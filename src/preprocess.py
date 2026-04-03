@@ -36,7 +36,14 @@ def detect_and_crop_face(image_path):
         face_detected = True
 
     # Convert the cropped face to PIL image (RGB format)
-    face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)     
-    face = Image.fromarray(face)
+    # Safety check
+    if face is None or face.size == 0:
+        raise ValueError("Face crop failed or empty image.")
+
+    # Convert BGR → RGB
+    face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+
+    # Convert to PIL safely
+    face = Image.fromarray(face).convert("RGB")
 
     return (face, face_detected)

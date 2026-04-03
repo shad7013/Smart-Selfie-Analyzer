@@ -32,7 +32,14 @@ def load_model(model_path="models/best_model.pth"):
 # Preprocess the image with face detection and cropping
 def preprocess_image(image_path):
     image, face_detected = detect_and_crop_face(image_path)
+
+    # ✅ ADD THIS CHECK HERE
+    if not isinstance(image, Image.Image):
+        raise TypeError(f"Expected PIL Image, got {type(image)}")
+
+    # Transform
     image = transform(image).unsqueeze(0)
+
     return image.to(device), face_detected
 
 # Predict function
@@ -64,7 +71,7 @@ def predict(image_path, model, task="emotion"):
     else:
         target_class = gender_pred
 
-    cam = gradcam.generate(image, target_class, task=task)
+    cam = gradcam.generate(image.clone(), target_class, task=task)
 
     # get the original face image for overlay
     face_img, _ = detect_and_crop_face(image_path)
