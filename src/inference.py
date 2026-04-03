@@ -1,6 +1,7 @@
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
+import numpy as np
 
 from src.model import MultiTaskModel
 from src.preprocess import detect_and_crop_face
@@ -32,10 +33,19 @@ def load_model(model_path="models/best_model.pth"):
 # Preprocess the image with face detection and cropping
 def preprocess_image(image_path):
     image, face_detected = detect_and_crop_face(image_path)
+    print("TYPE:", type(image))
+    if hasattr(image, "mode"):
+        print("MODE:", image.mode)
 
-    # ✅ ADD THIS CHECK HERE
+    # ✅ Force correct format
+    if isinstance(image, np.ndarray):
+        image = Image.fromarray(image)
+
     if not isinstance(image, Image.Image):
-        raise TypeError(f"Expected PIL Image, got {type(image)}")
+        raise TypeError(f"Invalid image type: {type(image)}")
+
+    # ✅ Force RGB (VERY IMPORTANT)
+    image = image.convert("RGB")
 
     # Transform
     image = transform(image).unsqueeze(0)

@@ -43,7 +43,7 @@ def detect_and_crop_face(image_path):
     # Convert BGR → RGB
     face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
 
-    # Convert to PIL safely
+    # Convert safely to PIL RGB
     face = Image.fromarray(face).convert("RGB")
 
-    return (face, face_detected)
+    return face, face_detected
