@@ -107,6 +107,6 @@ streamlit run app/streamlit_app.py
 
 ## 👤 Author
 
-Your Name
-GitHub: your-link
-LinkedIn: your-link
+Your : Mohammed Shad T
+GitHub: https://github.com/shad7013
+LinkedIn: www.linkedin.com/in/mohammed-shad-t-4b6866269
