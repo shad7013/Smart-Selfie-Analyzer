@@ -48,8 +48,17 @@ elif option == "Use Camera":
     image_file = st.camera_input("Take a selfie")
 
 
-# 🔹 Main flow
+# 🔹 Reset state when a new image is uploaded
+if "last_file_name" not in st.session_state:
+    st.session_state["last_file_name"] = None
+
 if image_file is not None:
+    current_name = getattr(image_file, "name", "camera_input")
+
+    if current_name != st.session_state["last_file_name"]:
+        st.session_state["last_file_name"] = current_name
+        st.session_state["result"] = None
+        st.session_state["show_gradcam"] = False
 
     # Save temp file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
@@ -73,36 +82,36 @@ if image_file is not None:
 
         if not result["face_detected"]:
             st.warning("⚠️ No face detected. Results may be inaccurate.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Age Group", result["age"])
+            col2.metric("Gender", result["gender"])
+            col3.metric("Emotion", result["emotion"])
 
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Age Group", result["age"])
-        col2.metric("Gender", result["gender"])
-        col3.metric("Emotion", result["emotion"])
+            # 🔹 Grad-CAM task selector
+            task_option = st.radio(
+                "Select Grad-CAM For:",
+                ["emotion", "age", "gender"],
+                index=["emotion", "age", "gender"].index(st.session_state["selected_task"])
+            )
 
-        # 🔹 Grad-CAM task selector
-        task_option = st.radio(
-            "Select Grad-CAM For:",
-            ["emotion", "age", "gender"],
-            index=["emotion", "age", "gender"].index(st.session_state["selected_task"])
-        )
+            # Save selected task
+            st.session_state["selected_task"] = task_option
 
-        # Save selected task
-        st.session_state["selected_task"] = task_option
+            # 🔹 Grad-CAM button
+            if st.button("🔥 Show Grad-CAM Heatmap"):
+                st.session_state["show_gradcam"] = True
 
-        # 🔹 Grad-CAM button
-        if st.button("🔥 Show Grad-CAM Heatmap"):
-            st.session_state["show_gradcam"] = True
+            # 🔹 Show Grad-CAM
+            if st.session_state.get("show_gradcam"):
 
-        # 🔹 Show Grad-CAM
-        if st.session_state.get("show_gradcam"):
+                selected_task = st.session_state["selected_task"]
 
-            selected_task = st.session_state["selected_task"]
+                # Generate Grad-CAM for selected task
+                result_cam = predict(temp_path, model, task=selected_task)
 
-            # Generate Grad-CAM for selected task
-            result_cam = predict(temp_path, model, task=selected_task)
-
-            
-            st.image(result_cam["heatmap"], caption=selected_task.capitalize(), width="content")
+                
+                st.image(result_cam["heatmap"], caption=selected_task.capitalize(), width="content")
 
     # Cleanup temp file
     os.remove(temp_path)
