@@ -55,7 +55,7 @@ if "last_file_name" not in st.session_state:
 if image_file is not None:
     current_name = getattr(image_file, "name", "camera_input")
     
-    st.image(image_file, caption="Uploaded Image", width=300')
+    st.image(image_file, caption="Uploaded Image", width=300)
 
     if current_name != st.session_state["last_file_name"]:
         st.session_state["last_file_name"] = current_name
